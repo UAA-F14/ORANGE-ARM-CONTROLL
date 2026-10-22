@@ -7,17 +7,18 @@ de joystick.
 
 ## Estructura
 
-- **`P6PWMLIBRARY/`** — Biblioteca de GPIO (`libgpiod`) y PWM
-  (`sysfs`). `pwm_open(canal)` regresa un handle por canal, para poder
-  tener varios servos activos a la vez.
-- **`P8PS4/`** — Biblioteca de lectura del DS4 por `evdev`: sticks,
-  botones, gatillos, D-pad, giroscopio y acelerómetro, con calibración
-  del sesgo del giroscopio incluida.
-- **`EX2BrazoPS4/`** — Programa final para la Orange Pi: usa las dos
-  bibliotecas de arriba para mover 3 servos reales con el control.
-- **`PS4 CONTROL CODE/`** — Prototipos de laptop/escritorio (antes de
-  tener los servos físicos): lectura por terminal, visualización con
+- **`code/`** — Código para la Orange Pi (el destino final). Una sola
+  biblioteca/programa:
+  - `inc/` — headers (`gpio.h`, `pwm.h`, `ps4.h`)
+  - `src/` — implementación (`gpio.c`, `pwm.c`, `ps4.c`)
+  - `main.c` — programa principal: lee el control con `ps4.h` y mueve
+    los 3 servos con `pwm.h`
+  - `CMakeLists.txt`
+- **`demo/`** — Prototipos para correr en laptop/escritorio (Linux
+  PC), no en la Orange Pi: lectura por terminal, visualización con
   SDL2, y la simulación 3D del brazo con OpenGL.
+- **`design/3DDesign/`** — Modelo 3D del brazo (CAD). Placeholder
+  hasta que se comparta el link/archivo del diseño.
 
 ## Control
 
@@ -49,22 +50,19 @@ denied" en el canal HID aunque ya esté "Bonded: yes", es que el agente
 de emparejamiento no forzó "Just Works" — por eso el
 `agent NoInputNoOutput` antes de parear.
 
-## Compilar (Orange Pi)
-
-Cada carpeta tiene su propio `CMakeLists.txt`:
+## Compilar (Orange Pi, `code/`)
 
 ```bash
-cd P6PWMLIBRARY && cmake -S . -B build && cmake --build build
-cd P8PS4         && cmake -S . -B build && cmake --build build
-cd EX2BrazoPS4   && cmake -S . -B build && cmake --build build
+cd code
+cmake -S . -B build
+cmake --build build
+./build/EX2BrazoPS4
 ```
 
-`EX2BrazoPS4` compila los fuentes de las otras dos carpetas
-directamente (rutas relativas en su `CMakeLists.txt`), no son copias.
-
-## Compilar (laptop, `PS4 CONTROL CODE/`)
+## Compilar (laptop, `demo/`)
 
 ```bash
+cd demo
 gcc ds4_read.c -o ds4_read
 gcc ds4_gui.c -o ds4_gui $(pkg-config --cflags --libs sdl2) -lm
 gcc ds4_arm3d.c -o ds4_arm3d $(pkg-config --cflags --libs sdl2) -lGL -lGLU -lm

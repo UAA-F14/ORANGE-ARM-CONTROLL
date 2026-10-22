@@ -1,0 +1,5 @@
+build/
+*.o
+demo/ds4_read
+demo/ds4_gui
+demo/ds4_arm3d
